@@ -18,17 +18,16 @@ export default function LoginPage() {
   const error = searchParams.get('error')
 
   const [email, setEmail] = useState('')
-  const [password, setPassword] = useState('')
   const [isLoading, setIsLoading] = useState(false)
   const [isGoogleLoading, setIsGoogleLoading] = useState(false)
+  const [emailSent, setEmailSent] = useState(false)
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
     setIsLoading(true)
 
-    const result = await signIn('credentials', {
+    const result = await signIn('email', {
       email,
-      password,
       redirect: false,
       callbackUrl,
     })
@@ -36,9 +35,11 @@ export default function LoginPage() {
     setIsLoading(false)
 
     if (result?.error) {
-      // Handle error
-    } else if (result?.url) {
-      router.push(result.url)
+      // Handle error - show error message
+      console.error('Sign in error:', result.error)
+    } else {
+      // Email sent successfully
+      setEmailSent(true)
     }
   }
 
@@ -106,39 +107,45 @@ export default function LoginPage() {
             </span>
           </div>
 
-          <form onSubmit={handleSubmit} className="space-y-4">
-            <div className="space-y-2">
-              <Label htmlFor="email">Email</Label>
-              <Input
-                id="email"
-                type="email"
-                placeholder="you@example.com"
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
-                required
-              />
+          {emailSent ? (
+            <div className="p-4 bg-green-50 border border-green-200 text-green-700 dark:bg-green-950 dark:border-green-800 dark:text-green-300 rounded-md text-sm">
+              <p className="font-semibold mb-1">Check your email!</p>
+              <p>We&apos;ve sent a magic link to <strong>{email}</strong>. Click the link to sign in.</p>
+              <Button
+                variant="ghost"
+                className="mt-3 w-full"
+                onClick={() => setEmailSent(false)}
+              >
+                Send another link
+              </Button>
             </div>
-            <div className="space-y-2">
-              <Label htmlFor="password">Password</Label>
-              <Input
-                id="password"
-                type="password"
-                placeholder="Enter your password"
-                value={password}
-                onChange={(e) => setPassword(e.target.value)}
-                required
-              />
-            </div>
-            <Button type="submit" className="w-full" disabled={isLoading}>
-              {isLoading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-              Sign In
-            </Button>
-          </form>
+          ) : (
+            <form onSubmit={handleSubmit} className="space-y-4">
+              <div className="space-y-2">
+                <Label htmlFor="email">Email</Label>
+                <Input
+                  id="email"
+                  type="email"
+                  placeholder="you@example.com"
+                  value={email}
+                  onChange={(e) => setEmail(e.target.value)}
+                  required
+                />
+                <p className="text-xs text-muted-foreground">
+                  We&apos;ll send you a magic link to sign in
+                </p>
+              </div>
+              <Button type="submit" className="w-full" disabled={isLoading}>
+                {isLoading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+                Send Magic Link
+              </Button>
+            </form>
+          )}
 
           <p className="mt-6 text-center text-sm text-muted-foreground">
-            Don&apos;t have an account?{' '}
+            New to TripPlanner?{' '}
             <Link href="/register" className="text-blue-600 hover:underline">
-              Sign up
+              Create an account
             </Link>
           </p>
         </CardContent>
