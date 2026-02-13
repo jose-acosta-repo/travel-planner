@@ -1,6 +1,4 @@
 import { NextAuthOptions } from 'next-auth'
-import GoogleProvider from 'next-auth/providers/google'
-import EmailProvider from 'next-auth/providers/email'
 import CredentialsProvider from 'next-auth/providers/credentials'
 import { SupabaseAdapter } from '@auth/supabase-adapter'
 import { createClient } from '@supabase/supabase-js'
@@ -8,10 +6,6 @@ import jwt from 'jsonwebtoken'
 
 export const authOptions: NextAuthOptions = {
   providers: [
-    GoogleProvider({
-      clientId: process.env.GOOGLE_CLIENT_ID!,
-      clientSecret: process.env.GOOGLE_CLIENT_SECRET!,
-    }),
     CredentialsProvider({
       name: 'credentials',
       credentials: {
@@ -52,17 +46,6 @@ export const authOptions: NextAuthOptions = {
           name: profile?.name || data.user.email!.split('@')[0],
         }
       },
-    }),
-    EmailProvider({
-      server: {
-        host: process.env.EMAIL_SERVER_HOST,
-        port: process.env.EMAIL_SERVER_PORT,
-        auth: {
-          user: process.env.EMAIL_SERVER_USER,
-          pass: process.env.EMAIL_SERVER_PASSWORD,
-        },
-      },
-      from: process.env.EMAIL_FROM,
     }),
   ],
   adapter: SupabaseAdapter({
