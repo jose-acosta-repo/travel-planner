@@ -18,28 +18,49 @@ export default function LoginPage() {
   const error = searchParams.get('error')
 
   const [email, setEmail] = useState('')
+  const [password, setPassword] = useState('')
   const [isLoading, setIsLoading] = useState(false)
   const [isGoogleLoading, setIsGoogleLoading] = useState(false)
+  const [showMagicLink, setShowMagicLink] = useState(false)
   const [emailSent, setEmailSent] = useState(false)
+  const [loginError, setLoginError] = useState('')
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
     setIsLoading(true)
+    setLoginError('')
 
-    const result = await signIn('email', {
-      email,
-      redirect: false,
-      callbackUrl,
-    })
+    if (showMagicLink) {
+      // Magic link authentication
+      const result = await signIn('email', {
+        email,
+        redirect: false,
+        callbackUrl,
+      })
 
-    setIsLoading(false)
+      setIsLoading(false)
 
-    if (result?.error) {
-      // Handle error - show error message
-      console.error('Sign in error:', result.error)
+      if (result?.error) {
+        setLoginError('Failed to send magic link')
+      } else {
+        setEmailSent(true)
+      }
     } else {
-      // Email sent successfully
-      setEmailSent(true)
+      // Password authentication
+      const result = await signIn('credentials', {
+        email,
+        password,
+        redirect: false,
+        callbackUrl,
+      })
+
+      setIsLoading(false)
+
+      if (result?.error) {
+        setLoginError('Invalid email or password')
+      } else if (result?.url) {
+        router.push(result.url)
+      }
     }
   }
 
@@ -60,12 +81,13 @@ export default function LoginPage() {
           <CardDescription>Sign in to continue planning your trips</CardDescription>
         </CardHeader>
         <CardContent>
-          {error && (
-            <div className="mb-4 p-3 bg-red-50 border border-red-200 text-red-700 rounded-md text-sm">
-              {error === 'OAuthSignin' && 'Error starting sign in process'}
-              {error === 'OAuthCallback' && 'Error during sign in callback'}
-              {error === 'CredentialsSignin' && 'Invalid email or password'}
-              {error === 'Default' && 'An error occurred during sign in'}
+          {(error || loginError) && (
+            <div className="mb-4 p-3 bg-red-50 border border-red-200 text-red-700 dark:bg-red-950 dark:border-red-800 dark:text-red-300 rounded-md text-sm">
+              {loginError ||
+               (error === 'OAuthSignin' && 'Error starting sign in process') ||
+               (error === 'OAuthCallback' && 'Error during sign in callback') ||
+               (error === 'CredentialsSignin' && 'Invalid email or password') ||
+               (error === 'Default' && 'An error occurred during sign in')}
             </div>
           )}
 
@@ -114,9 +136,12 @@ export default function LoginPage() {
               <Button
                 variant="ghost"
                 className="mt-3 w-full"
-                onClick={() => setEmailSent(false)}
+                onClick={() => {
+                  setEmailSent(false)
+                  setShowMagicLink(false)
+                }}
               >
-                Send another link
+                Back to login
               </Button>
             </div>
           ) : (
@@ -131,14 +156,37 @@ export default function LoginPage() {
                   onChange={(e) => setEmail(e.target.value)}
                   required
                 />
-                <p className="text-xs text-muted-foreground">
-                  We&apos;ll send you a magic link to sign in
-                </p>
               </div>
+              {!showMagicLink && (
+                <div className="space-y-2">
+                  <Label htmlFor="password">Password</Label>
+                  <Input
+                    id="password"
+                    type="password"
+                    placeholder="Enter your password"
+                    value={password}
+                    onChange={(e) => setPassword(e.target.value)}
+                    required={!showMagicLink}
+                  />
+                </div>
+              )}
               <Button type="submit" className="w-full" disabled={isLoading}>
                 {isLoading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-                Send Magic Link
+                {showMagicLink ? 'Send Magic Link' : 'Sign In'}
               </Button>
+
+              <div className="text-center">
+                <button
+                  type="button"
+                  onClick={() => {
+                    setShowMagicLink(!showMagicLink)
+                    setLoginError('')
+                  }}
+                  className="text-sm text-blue-600 hover:underline"
+                >
+                  {showMagicLink ? 'Use password instead' : 'Use magic link instead'}
+                </button>
+              </div>
             </form>
           )}
 
