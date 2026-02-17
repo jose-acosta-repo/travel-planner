@@ -1,4 +1,5 @@
 import { NextResponse } from 'next/server'
+import { createClient } from '@supabase/supabase-js'
 import { createServiceClient } from '@/lib/supabase/server'
 
 export async function POST(request: Request) {
@@ -19,14 +20,20 @@ export async function POST(request: Request) {
       )
     }
 
-    const supabase = await createServiceClient()
+    // Use anon key client for signUp - this sends confirmation email automatically
+    const supabase = createClient(
+      process.env.NEXT_PUBLIC_SUPABASE_URL!,
+      process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
+    )
 
-    // Create user in Supabase Auth
-    const { data: authData, error: authError } = await supabase.auth.admin.createUser({
+    // Sign up user - Supabase will send confirmation email
+    const { data: authData, error: authError } = await supabase.auth.signUp({
       email,
       password,
-      email_confirm: true,
-      user_metadata: { name },
+      options: {
+        data: { name },
+        emailRedirectTo: `${process.env.NEXTAUTH_URL}/auth/confirm`,
+      },
     })
 
     if (authError) {
@@ -39,16 +46,21 @@ export async function POST(request: Request) {
       return NextResponse.json({ error: authError.message }, { status: 400 })
     }
 
-    // Create profile
+    // Create profile using service role client
     if (authData.user) {
-      await supabase.from('profiles').insert({
+      const serviceClient = await createServiceClient()
+      await serviceClient.from('profiles').insert({
         id: authData.user.id,
         email: authData.user.email,
         name: name || email.split('@')[0],
       })
     }
 
-    return NextResponse.json({ success: true })
+    return NextResponse.json({
+      success: true,
+      requiresEmailVerification: true,
+      message: 'Please check your email to verify your account'
+    })
   } catch (error) {
     console.error('Registration error:', error)
     return NextResponse.json(

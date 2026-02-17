@@ -2,16 +2,15 @@
 
 import { useState } from 'react'
 import Link from 'next/link'
+import { createClient } from '@supabase/supabase-js'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
-import { Plane, Loader2, Mail, CheckCircle } from 'lucide-react'
+import { Plane, Loader2, Mail, ArrowLeft, CheckCircle } from 'lucide-react'
 
-export default function RegisterPage() {
-  const [name, setName] = useState('')
+export default function ForgotPasswordPage() {
   const [email, setEmail] = useState('')
-  const [password, setPassword] = useState('')
   const [isLoading, setIsLoading] = useState(false)
   const [error, setError] = useState('')
   const [success, setSuccess] = useState(false)
@@ -22,22 +21,20 @@ export default function RegisterPage() {
     setError('')
 
     try {
-      const response = await fetch('/api/auth/register', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ name, email, password }),
+      const supabase = createClient(
+        process.env.NEXT_PUBLIC_SUPABASE_URL!,
+        process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
+      )
+
+      const { error } = await supabase.auth.resetPasswordForEmail(email, {
+        redirectTo: `${window.location.origin}/reset-password`,
       })
 
-      const data = await response.json()
-
-      if (!response.ok) {
-        setError(data.error || 'Registration failed')
-        setIsLoading(false)
-        return
+      if (error) {
+        setError(error.message)
+      } else {
+        setSuccess(true)
       }
-
-      // Show success message for email verification
-      setSuccess(true)
     } catch (err) {
       setError('Something went wrong. Please try again.')
     }
@@ -57,14 +54,14 @@ export default function RegisterPage() {
             </div>
             <CardTitle>Check your email</CardTitle>
             <CardDescription>
-              We&apos;ve sent a verification link to <strong>{email}</strong>
+              We&apos;ve sent a password reset link to <strong>{email}</strong>
             </CardDescription>
           </CardHeader>
           <CardContent className="space-y-4">
             <div className="flex items-center gap-3 p-4 bg-blue-50 dark:bg-blue-950 rounded-lg">
               <Mail className="h-5 w-5 text-blue-600 dark:text-blue-400 flex-shrink-0" />
               <p className="text-sm text-blue-800 dark:text-blue-200">
-                Click the link in your email to verify your account and complete registration.
+                Click the link in your email to reset your password.
               </p>
             </div>
             <p className="text-center text-sm text-muted-foreground">
@@ -73,8 +70,6 @@ export default function RegisterPage() {
                 onClick={() => {
                   setSuccess(false)
                   setEmail('')
-                  setPassword('')
-                  setName('')
                 }}
                 className="text-blue-600 hover:underline"
               >
@@ -82,12 +77,12 @@ export default function RegisterPage() {
               </button>
             </p>
             <div className="pt-4 border-t">
-              <p className="text-center text-sm text-muted-foreground">
-                Already verified?{' '}
-                <Link href="/login" className="text-blue-600 hover:underline">
-                  Sign in
-                </Link>
-              </p>
+              <Link href="/login">
+                <Button variant="outline" className="w-full">
+                  <ArrowLeft className="mr-2 h-4 w-4" />
+                  Back to sign in
+                </Button>
+              </Link>
             </div>
           </CardContent>
         </Card>
@@ -103,8 +98,10 @@ export default function RegisterPage() {
             <Plane className="h-8 w-8 text-blue-600" />
             <span className="text-2xl font-bold text-gray-900 dark:text-white">TripPlanner</span>
           </Link>
-          <CardTitle>Create an account</CardTitle>
-          <CardDescription>Start planning your perfect trips today</CardDescription>
+          <CardTitle>Forgot your password?</CardTitle>
+          <CardDescription>
+            Enter your email address and we&apos;ll send you a link to reset your password.
+          </CardDescription>
         </CardHeader>
         <CardContent>
           {error && (
@@ -114,17 +111,6 @@ export default function RegisterPage() {
           )}
 
           <form onSubmit={handleSubmit} className="space-y-4">
-            <div className="space-y-2">
-              <Label htmlFor="name">Full Name</Label>
-              <Input
-                id="name"
-                type="text"
-                placeholder="John Doe"
-                value={name}
-                onChange={(e) => setName(e.target.value)}
-                required
-              />
-            </div>
             <div className="space-y-2">
               <Label htmlFor="email">Email</Label>
               <Input
@@ -136,31 +122,20 @@ export default function RegisterPage() {
                 required
               />
             </div>
-            <div className="space-y-2">
-              <Label htmlFor="password">Password</Label>
-              <Input
-                id="password"
-                type="password"
-                placeholder="Create a password"
-                value={password}
-                onChange={(e) => setPassword(e.target.value)}
-                required
-                minLength={8}
-              />
-              <p className="text-xs text-muted-foreground">Must be at least 8 characters</p>
-            </div>
             <Button type="submit" className="w-full" disabled={isLoading}>
               {isLoading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-              Create Account
+              Send reset link
             </Button>
           </form>
 
-          <p className="mt-6 text-center text-sm text-muted-foreground">
-            Already have an account?{' '}
-            <Link href="/login" className="text-blue-600 hover:underline">
-              Sign in
+          <div className="mt-6">
+            <Link href="/login">
+              <Button variant="ghost" className="w-full">
+                <ArrowLeft className="mr-2 h-4 w-4" />
+                Back to sign in
+              </Button>
             </Link>
-          </p>
+          </div>
         </CardContent>
       </Card>
     </div>
