@@ -30,11 +30,10 @@ export function CollaboratorsView({ trip, onInvite, onRefresh }: CollaboratorsVi
     try {
       // Generate PDF content
       const tripData = {
-        name: trip.name,
+        name: trip.title,
         destination: trip.destination,
         dates: `${new Date(trip.start_date).toLocaleDateString()} - ${new Date(trip.end_date).toLocaleDateString()}`,
-        budget: trip.budget,
-        days: trip.itinerary?.length || 0,
+        days: 0,
       }
 
       // For now, we'll open a print dialog which allows saving as PDF
@@ -45,7 +44,7 @@ export function CollaboratorsView({ trip, onInvite, onRefresh }: CollaboratorsVi
           <!DOCTYPE html>
           <html>
             <head>
-              <title>${trip.name} - Trip Itinerary</title>
+              <title>${trip.title} - Trip Itinerary</title>
               <style>
                 body { font-family: Arial, sans-serif; padding: 40px; max-width: 800px; margin: 0 auto; }
                 h1 { color: #2563eb; border-bottom: 3px solid #2563eb; padding-bottom: 10px; }
@@ -56,11 +55,11 @@ export function CollaboratorsView({ trip, onInvite, onRefresh }: CollaboratorsVi
               </style>
             </head>
             <body>
-              <h1>${trip.name}</h1>
+              <h1>${trip.title}</h1>
               <div class="trip-info">
                 <p><span class="label">Destination:</span> ${trip.destination}</p>
                 <p><span class="label">Dates:</span> ${tripData.dates}</p>
-                <p><span class="label">Budget:</span> $${trip.budget}</p>
+                <p><span class="label">Type:</span> ${trip.trip_type}</p>
                 <p><span class="label">Duration:</span> ${tripData.days} days</p>
               </div>
               <p style="margin-top: 40px; color: #6b7280; font-size: 14px;">
