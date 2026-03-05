@@ -206,7 +206,7 @@ function TripCard({ trip, viewMode }: { trip: Trip; viewMode?: 'grid' | 'list' }
                   <div className="flex -space-x-2">
                     {trip.collaborators.slice(0, 3).map((collab, idx) => (
                       <Avatar key={idx} className="h-7 w-7 border-2 border-white dark:border-gray-800">
-                        <AvatarImage src={collab.user?.avatar_url} />
+                        <AvatarImage src={collab.user?.avatar_url ?? undefined} />
                         <AvatarFallback className="bg-blue-600 text-white text-xs">
                           {collab.user?.name?.[0]?.toUpperCase() || 'U'}
                         </AvatarFallback>
