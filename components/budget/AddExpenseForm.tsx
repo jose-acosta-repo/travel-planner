@@ -20,7 +20,7 @@ import Image from 'next/image'
 interface Collaborator {
   id: string
   user?: {
-    name?: string
+    name?: string | null
   }
 }
 
