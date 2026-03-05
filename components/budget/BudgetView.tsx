@@ -70,7 +70,7 @@ interface BudgetViewProps {
     collaborators?: Array<{
       id: string
       user?: {
-        name?: string
+        name?: string | null
       }
     }>
   }
