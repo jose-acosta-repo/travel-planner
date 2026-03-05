@@ -150,9 +150,10 @@ export function TripList({
 }
 
 function TripCard({ trip, viewMode }: { trip: Trip; viewMode?: 'grid' | 'list' }) {
-  const typeColors = {
-    personal: 'bg-white/90 text-gray-900 dark:bg-gray-800/90 dark:text-white backdrop-blur-sm',
-    business: 'bg-white/90 text-gray-900 dark:bg-gray-800/90 dark:text-white backdrop-blur-sm',
+  const defaultColor = 'bg-white/90 text-gray-900 dark:bg-gray-800/90 dark:text-white backdrop-blur-sm'
+  const typeColors: Record<string, string> = {
+    personal: defaultColor,
+    business: defaultColor,
   }
 
   const itemCount = trip.items?.length || 0
@@ -170,7 +171,7 @@ function TripCard({ trip, viewMode }: { trip: Trip; viewMode?: 'grid' | 'list' }
           />
           <div className="absolute inset-0 bg-gradient-to-t from-black/40 to-transparent" />
           <div className="absolute top-3 left-3">
-            <Badge className={typeColors[trip.trip_type]}>
+            <Badge className={typeColors[trip.trip_type] || defaultColor}>
               {trip.trip_type.toUpperCase()}
             </Badge>
           </div>
