@@ -19,7 +19,7 @@ export function CollaboratorsView({ trip, onInvite, onRefresh }: CollaboratorsVi
 
   const handleShareItinerary = () => {
     const shareUrl = `${window.location.origin}/trips/${trip.id}`
-    const shareText = `Check out my trip to ${trip.destination}!\n${trip.name}\n${shareUrl}`
+    const shareText = `Check out my trip to ${trip.destination}!\n${trip.title}\n${shareUrl}`
 
     navigator.clipboard.writeText(shareText)
     alert('Trip itinerary link copied to clipboard!')
