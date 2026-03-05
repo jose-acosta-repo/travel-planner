@@ -231,7 +231,7 @@ export function BudgetView({ tripId, trip }: BudgetViewProps) {
       avatar: getInitials(memberName),
       contributed,
       budget,
-      status: (contributed >= budget ? 'Fully paid' : 'Unsettled') as const,
+      status: contributed >= budget ? ('Fully paid' as const) : ('Unsettled' as const),
     }
   })
 
@@ -245,7 +245,7 @@ export function BudgetView({ tripId, trip }: BudgetViewProps) {
       avatar: getInitials(currentUserName),
       contributed,
       budget,
-      status: (contributed >= budget ? 'Fully paid' : 'Unsettled') as const,
+      status: contributed >= budget ? ('Fully paid' as const) : ('Unsettled' as const),
     })
   }
 
