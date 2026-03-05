@@ -35,19 +35,27 @@ export async function GET() {
       .select('*')
 
     // Check RLS policies
-    const { data: policies, error: policiesError } = await supabase.rpc('exec_sql', {
-      sql: `
-        SELECT
-          tablename,
-          policyname,
-          permissive,
-          roles,
-          cmd
-        FROM pg_policies
-        WHERE tablename = 'calendar_events'
-        AND schemaname = 'public'
-      `
-    }).catch(() => ({ data: null, error: { message: 'Cannot query policies directly' } }))
+    let policies = null
+    let policiesError: { message: string } | null = null
+    try {
+      const result = await supabase.rpc('exec_sql', {
+        sql: `
+          SELECT
+            tablename,
+            policyname,
+            permissive,
+            roles,
+            cmd
+          FROM pg_policies
+          WHERE tablename = 'calendar_events'
+          AND schemaname = 'public'
+        `
+      })
+      policies = result.data
+      policiesError = result.error
+    } catch {
+      policiesError = { message: 'Cannot query policies directly' }
+    }
 
     return NextResponse.json({
       debug: {
