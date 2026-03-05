@@ -6,7 +6,8 @@ declare module 'next-auth' {
     user: {
       id: string
     } & DefaultSession['user']
-    supabaseAccessToken?: string
+    accessToken?: string
+    refreshToken?: string
   }
 
   interface User extends DefaultUser {
@@ -18,5 +19,7 @@ declare module 'next-auth/jwt' {
   interface JWT extends DefaultJWT {
     id?: string
     accessToken?: string
+    refreshToken?: string
+    expiresAt?: number
   }
 }
